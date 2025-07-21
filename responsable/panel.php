@@ -1,7 +1,7 @@
 <?php
 // Incluir el archivo de configuración para la conexión a la base de datos
 require_once '../config.php';
-session_start(); // Asegúrate de iniciar la sesión
+session_start(); // iniciar la sesión
 
 // Verificar si el usuario está autenticado
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'responsable') {
@@ -35,126 +35,123 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <a href="../logout.php">Cerrar Sesión</a>
-    <title>Panel del Responsable</title>
+    <title>Panel del Responsable - CostaSol</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
-        #chat-panel {
-            background: white;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            max-width: 600px;
-            margin: auto;
-        }
-        h2 {
-            text-align: center;
-        }
-        .chat-item {
-            border-bottom: 1px solid #ccc;
-            padding: 10px 0;
-        }
-        .chat-item:last-child {
-            border-bottom: none;
-        }
-        .chat-link {
-            text-decoration: none;
-            color: #007bff;
-        }
-        .chat-link:hover {
-            text-decoration: underline;
-        }
-        .unread-count {
-            color: red;
-            font-weight: bold;
-        }
-        #send-message {
-            margin-top: 20px;
-        }
-        #message {
-            width: calc(100% - 100px);
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        #send-button {
-            padding: 10px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #send-button:hover {
-            background-color: #218838;
-        }
-    </style>
+    <link rel="stylesheet" href="../assets/css/stylepanel.css"> <!-- Incluir archivos CSS -->
 </head>
 <body>
 
-<div id="chat-panel">
-    <h2>Chats Asignados</h2>
-    <?php if (count($chats) > 0): ?>
-        <?php foreach ($chats as $chat): ?>
-            <div class="chat-item">
-                <a class="chat-link" href="chat.php?chat_id=<?= $chat['chat_id'] ?>">
-                    <?= htmlspecialchars($chat['cliente_nombre']) ?> 
-                    <span class="unread-count">(<?= $chat['mensajes_no_leidos'] ?> no leídos)</span>
-                </a>
+    <header class="site-header">
+        <div class="logo"><img src="../assets/image/costasollogo.jpg" alt="Logo CostaSol"></div>
+        <nav class="navbar">
+            <ul>
+                <li><a href="../index.php">CostaSol</a></li>
+                <li><a href="panel.php">Panel</a></li>
+                <li><a href="../logout.php" class="logout-btn">Cerrar Sesión</a></li>
+            </ul>
+        </nav>
+        <div class="social-icons">
+            <!-- Svg de facebook -->
+            <a href="https://es-es.facebook.com/costasolec/" target="_blank">
+                <svg class="socialSvg" viewBox="-0.002 0 176.015 176" fill="#646464ff" width="30" height="30">
+                    <path d="M171.63 40.85C167.68 25 151 8.31 135.15 4.36A262 262 0 0 0 88 0a262 262 0 0 0-47.15 4.36C25 8.31 8.32 25 4.37 40.85a256.4 256.4 0 0 0 0 94.3C8.32 151 25 167.7 40.85 171.64A262 262 0 0 0 88 176q6.72 0 13.4-.35a268.5 268.5 0 0 0 33.75-4c15.89-3.94 32.53-20.6 36.48-36.49A262.4 262.4 0 0 0 176 86.49a262 262 0 0 0-4.37-45.64m-55.75 36.74-1.77 15.32a2.86 2.86 0 0 1-2.82 2.57h-16l-.08 45.45a2.05 2.05 0 0 1-2 2.07H77a2 2 0 0 1-2-2.08V95.48H63a2.87 2.87 0 0 1-2.84-2.9l-.06-15.33a2.88 2.88 0 0 1 2.84-2.92H75v-14.8C75 42.35 85.2 33 100.16 33h12.26a2.88 2.88 0 0 1 2.85 2.92v12.91a2.88 2.88 0 0 1-2.85 2.92h-7.52c-8.13 0-9.71 4-9.71 9.77v12.81h17.87a2.89 2.89 0 0 1 2.82 3.26"></path>
+                </svg>
+            </a>
+
+            <!-- Svg de linkedin -->
+            <a href="https://www.linkedin.com/company/constructorathaliavictoria" target="_blank">
+                <svg class="socialSvg" viewBox="-0.003 0 176.004 176" fill="#646464ff" width="30" height="30">
+                    <path d="M171.63 40.84C167.68 25 151 8.31 135.15 4.36A262 262 0 0 0 88 0a262 262 0 0 0-47.15 4.36C25 8.31 8.32 25 4.37 40.84a256.5 256.5 0 0 0 0 94.31C8.32 151 25 167.7 40.85 171.63c8.89 1.61 17.54 2.77 26.11 3.48 1.86.16 3.71.29 5.56.41 5.17.32 10.32.48 15.48.48 4.48 0 8.94-.13 13.4-.36a268.5 268.5 0 0 0 33.75-4c15.85-3.94 32.53-20.64 36.48-36.49 1.28-7.05 2.27-14 3-20.87q.84-8.09 1.17-16.09.24-5.86.21-11.71a262 262 0 0 0-4.38-45.64M61 139.28a3.71 3.71 0 0 1-3.71 3.72H41.48a3.7 3.7 0 0 1-3.71-3.72V73a3.71 3.71 0 0 1 3.71-3.72h15.81A3.72 3.72 0 0 1 61 73ZM49.39 63a15 15 0 1 1 15-15 15 15 0 0 1-15 15m94.25 76.54a3.41 3.41 0 0 1-3.42 3.42h-17a3.41 3.41 0 0 1-3.42-3.42v-31.05c0-4.64 1.36-20.32-12.13-20.32-10.45 0-12.58 10.73-13 15.55v35.86A3.42 3.42 0 0 1 91.3 143H74.88a3.41 3.41 0 0 1-3.41-3.42V72.71a3.41 3.41 0 0 1 3.41-3.42H91.3a3.42 3.42 0 0 1 3.42 3.42v5.78c3.88-5.83 9.63-10.31 21.9-10.31 27.17 0 27 25.38 27 39.32Z"></path>                
+                </svg>
+            </a>
+        </div>
+    </header>
+
+    <div id="chat-panel">
+        <h2>Panel del Responsable</h2>
+        <h3 style="text-align: center; color: #6c757d; margin-bottom: 30px;">Chats Asignados</h3>
+        
+        <?php if (count($chats) > 0): ?>
+            <?php foreach ($chats as $chat): ?>
+                <div class="chat-item">
+                    <a class="chat-link" href="chat.php?chat_id=<?= $chat['chat_id'] ?>">
+                        <div class="client-name">
+                            <?= htmlspecialchars($chat['cliente_nombre']) ?>
+                        </div>
+                        <?php if ($chat['mensajes_no_leidos'] > 0): ?>
+                            <span class="unread-count"><?= $chat['mensajes_no_leidos'] ?></span>
+                        <?php endif; ?>
+                    </a>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <div class="no-chats">
+                <p>No tienes chats asignados actualmente.</p>
             </div>
-        <?php endforeach; ?>
-    <?php else: ?>
-        <p>No tienes chats asignados actualmente.</p>
-    <?php endif; ?>
+        <?php endif; ?>
 
-    <div id="send-message">
-        <h3>Enviar Mensaje Manualmente</h3>
-        <input type="text" id="message" placeholder="Escribe tu mensaje..." required>
-        <button id="send-button"><i class="fas fa-paper-plane"></i> Enviar</button>
+        <div id="send-message">
+            <h3>Enviar Mensaje Manualmente</h3>
+            <div class="message-form">
+                <input type="text" id="message" placeholder="Escribe tu mensaje..." required>
+                <button id="send-button">
+                    <i class="fas fa-paper-plane"></i>
+                    Enviar
+                </button>
+            </div>
+        </div>
     </div>
-</div>
 
-<script>
-    document.getElementById('send-button').addEventListener('click', function() {
-        const messageInput = document.getElementById('message');
-        const message = messageInput.value;
+    <script>
 
-        if (message.trim() === '') {
-            alert('Por favor, escribe un mensaje.');
-            return;
-        }
+        // Función para enviar el mensaje
+        document.getElementById('send-button').addEventListener('click', function() {
+            const messageInput = document.getElementById('message');
+            const message = messageInput.value;
 
-        // Enviar el mensaje al servidor (ajusta la URL según tu lógica)
-        const chatId = prompt("Por favor, ingresa el ID del chat al que deseas enviar el mensaje:");
-        fetch('http://localhost/chat-web/api/chat.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                chat_id: chatId, // Cambia esto según la lógica de asignación de chats
-                mensaje: message,
-                cliente_id: null, // No se necesita cliente_id aquí
-                responsable_id: <?= json_encode($responsable_id) ?> // Enviar el ID del responsable
+            if (message.trim() === '') {
+                alert('Por favor, escribe un mensaje.');
+                return;
+            }
+
+            // Enviar el mensaje al servidor ajusta la URL 
+            const chatId = prompt("Por favor, ingresa el ID del chat al que deseas enviar el mensaje:");
+            if (!chatId) {
+                return;
+            }
+
+            // Deshabilitar el botón mientras se envía
+            this.disabled = true;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+
+            fetch('http://localhost/chat-web/api/chat.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chat_id: chatId,
+                    mensaje: message,
+                    cliente_id: null,
+                    responsable_id: <?= json_encode($responsable_id) ?>
+                })
             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert('Mensaje enviado: ' + data.respuesta_bot);
-            messageInput.value = ''; // Limpiar el campo de entrada
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Hubo un problema al enviar el mensaje.');
+            .then(response => response.json())
+            .then(data => {
+                alert('Mensaje enviado: ' + data.respuesta_bot);
+                messageInput.value = '';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Hubo un problema al enviar el mensaje.');
+            })
+            .finally(() => {
+                // Rehabilitar el botón
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar';
+            });
         });
-    });
-</script>
+    </script>
 
 </body>
 </html>

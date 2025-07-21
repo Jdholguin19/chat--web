@@ -75,68 +75,62 @@ function assignResponsable($conn) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <a href="../logout.php">Cerrar Sesión</a>
-    <title>Chat Cliente</title>
+    <title>Chat Cliente - CostaSol</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
-        #chat-container {
-            background: white;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            max-width: 600px;
-            margin: auto;
-        }
-        #messages {
-            height: 300px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-        #message-input {
-            display: flex;
-        }
-        #message {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        #send-button {
-            padding: 10px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #send-button:hover {
-            background-color: #218838;
-        }
-    </style>
+    <link rel="stylesheet" href="../assets/css/stylechatcli.css">
 </head>
 <body>
+    <header class="site-header">
+        <div class="logo"><img src="../assets/image/costasollogo.jpg" alt="Logo CostaSol"></div>
+        <nav class="navbar">
+            <ul>
+                <li><a href="../index.php">CostaSol</a></li>
+                <li><a href="chat.php">Chat</a></li>
+            </ul>
+        </nav>
+        <div class="social-icons">
+            <!-- Svg de facebook -->
+            <a href="https://es-es.facebook.com/costasolec/" target="_blank">
+                <svg class="socialSvg" viewBox="-0.002 0 176.015 176" fill="#646464ff" width="30" height="30">
+                    <path d="M171.63 40.85C167.68 25 151 8.31 135.15 4.36A262 262 0 0 0 88 0a262 262 0 0 0-47.15 4.36C25 8.31 8.32 25 4.37 40.85a256.4 256.4 0 0 0 0 94.3C8.32 151 25 167.7 40.85 171.64A262 262 0 0 0 88 176q6.72 0 13.4-.35a268.5 268.5 0 0 0 33.75-4c15.89-3.94 32.53-20.6 36.48-36.49A262.4 262.4 0 0 0 176 86.49a262 262 0 0 0-4.37-45.64m-55.75 36.74-1.77 15.32a2.86 2.86 0 0 1-2.82 2.57h-16l-.08 45.45a2.05 2.05 0 0 1-2 2.07H77a2 2 0 0 1-2-2.08V95.48H63a2.87 2.87 0 0 1-2.84-2.9l-.06-15.33a2.88 2.88 0 0 1 2.84-2.92H75v-14.8C75 42.35 85.2 33 100.16 33h12.26a2.88 2.88 0 0 1 2.85 2.92v12.91a2.88 2.88 0 0 1-2.85 2.92h-7.52c-8.13 0-9.71 4-9.71 9.77v12.81h17.87a2.89 2.89 0 0 1 2.82 3.26"></path>
+                </svg>
+            </a>
 
-<div id="chat-container">
-    <a href="../logout.php">Cerrar Sesión</a>
-    <h2>Chat con Soporte</h2>
-    <div id="messages">
-        <?php foreach ($mensajes as $mensaje): ?>
-            <div><strong>Cliente:</strong> <?= htmlspecialchars($mensaje['contenido']) ?> <em>(<?= $mensaje['fecha'] ?>)</em></div>
-        <?php endforeach; ?>
+            <!-- Svg de linkedin -->
+            <a href="https://www.linkedin.com/company/constructorathaliavictoria" target="_blank">
+                <svg class="socialSvg" viewBox="-0.003 0 176.004 176" fill="#646464ff" width="30" height="30">
+                    <path d="M171.63 40.84C167.68 25 151 8.31 135.15 4.36A262 262 0 0 0 88 0a262 262 0 0 0-47.15 4.36C25 8.31 8.32 25 4.37 40.84a256.5 256.5 0 0 0 0 94.31C8.32 151 25 167.7 40.85 171.63c8.89 1.61 17.54 2.77 26.11 3.48 1.86.16 3.71.29 5.56.41 5.17.32 10.32.48 15.48.48 4.48 0 8.94-.13 13.4-.36a268.5 268.5 0 0 0 33.75-4c15.85-3.94 32.53-20.64 36.48-36.49 1.28-7.05 2.27-14 3-20.87q.84-8.09 1.17-16.09.24-5.86.21-11.71a262 262 0 0 0-4.38-45.64M61 139.28a3.71 3.71 0 0 1-3.71 3.72H41.48a3.7 3.7 0 0 1-3.71-3.72V73a3.71 3.71 0 0 1 3.71-3.72h15.81A3.72 3.72 0 0 1 61 73ZM49.39 63a15 15 0 1 1 15-15 15 15 0 0 1-15 15m94.25 76.54a3.41 3.41 0 0 1-3.42 3.42h-17a3.41 3.41 0 0 1-3.42-3.42v-31.05c0-4.64 1.36-20.32-12.13-20.32-10.45 0-12.58 10.73-13 15.55v35.86A3.42 3.42 0 0 1 91.3 143H74.88a3.41 3.41 0 0 1-3.41-3.42V72.71a3.41 3.41 0 0 1 3.41-3.42H91.3a3.42 3.42 0 0 1 3.42 3.42v5.78c3.88-5.83 9.63-10.31 21.9-10.31 27.17 0 27 25.38 27 39.32Z"></path>                
+                </svg>
+            </a>
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div id="chat-container">
+            <div class="chat-header">
+                <h2>Chat con Soporte</h2>
+                <a href="../logout.php" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </a>
+            </div>
+            
+            <div id="messages">
+                <?php foreach ($mensajes as $mensaje): ?>
+                    <div class="message">
+                        <strong>Cliente:</strong> <?= htmlspecialchars($mensaje['contenido']) ?> 
+                        <em>(<?= $mensaje['fecha'] ?>)</em>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            
+            <div id="message-input">
+                <input type="text" id="message" placeholder="Escribe tu mensaje..." required>
+                <button id="send-button">
+                    <i class="fas fa-paper-plane"></i> Enviar
+                </button>
+            </div>
+        </div>
     </div>
-    <div id="message-input">
-        <input type="text" id="message" placeholder="Escribe tu mensaje..." required>
-        <button id="send-button"><i class="fas fa-paper-plane"></i> Enviar</button>
-    </div>
-</div>
 
 <script>
     // Función para cargar mensajes
@@ -147,7 +141,7 @@ function assignResponsable($conn) {
                 const messagesContainer = document.getElementById('messages');
                 messagesContainer.innerHTML = ''; // Limpiar mensajes anteriores
                 data.mensajes.forEach(mensaje => {
-                    messagesContainer.innerHTML += `<div><strong>Cliente:</strong> ${mensaje.contenido} <em>(${mensaje.fecha})</em></div>`;
+                    messagesContainer.innerHTML += `<div class="message"><strong>Cliente:</strong> ${mensaje.contenido} <em>(${mensaje.fecha})</em></div>`;
                 });
                 messagesContainer.scrollTop = messagesContainer.scrollHeight; // Desplazar hacia abajo
             })
@@ -157,7 +151,8 @@ function assignResponsable($conn) {
     // Llamar a loadMessages cada 2 segundos
     setInterval(loadMessages, 2000);
 
-    document.getElementById('send-button').addEventListener('click', function() {
+    // Función para enviar mensaje
+    function sendMessage() {
         const messageInput = document.getElementById('message');
         const message = messageInput.value;
 
@@ -181,8 +176,8 @@ function assignResponsable($conn) {
         .then(data => {
             // Mostrar el mensaje enviado en el feed
             const messagesDiv = document.getElementById('messages');
-            messagesDiv.innerHTML += `<div><strong>Cliente:</strong> ${message} <em>(Ahora)</em></div>`;
-            messagesDiv.innerHTML += `<div><strong>Bot:</strong> ${data.respuesta_bot} <em>(Ahora)</em></div>`;
+            messagesDiv.innerHTML += `<div class="message"><strong>Cliente:</strong> ${message} <em>(Ahora)</em></div>`;
+            messagesDiv.innerHTML += `<div class="message"><strong>Bot:</strong> ${data.respuesta_bot} <em>(Ahora)</em></div>`;
             messagesDiv.scrollTop = messagesDiv.scrollHeight; // Desplazar hacia abajo
             messageInput.value = ''; // Limpiar el campo de entrada
         })
@@ -190,6 +185,16 @@ function assignResponsable($conn) {
             console.error('Error:', error);
             alert('Hubo un problema al enviar el mensaje.');
         });
+    }
+
+    // Event listeners
+    document.getElementById('send-button').addEventListener('click', sendMessage);
+
+    // Permitir enviar mensaje con Enter
+    document.getElementById('message').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
     });
 </script>
 
