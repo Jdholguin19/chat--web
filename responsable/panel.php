@@ -1,5 +1,4 @@
 <?php
-// Incluir el archivo de configuración para la conexión a la base de datos
 require_once '../config.php';
 session_start(); // Asegúrate de iniciar la sesión
 
@@ -74,26 +73,6 @@ $conn->close();
             color: red;
             font-weight: bold;
         }
-        #send-message {
-            margin-top: 20px;
-        }
-        #message {
-            width: calc(100% - 100px);
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        #send-button {
-            padding: 10px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        #send-button:hover {
-            background-color: #218838;
-        }
     </style>
 </head>
 <body>
@@ -112,49 +91,7 @@ $conn->close();
     <?php else: ?>
         <p>No tienes chats asignados actualmente.</p>
     <?php endif; ?>
-
-    <div id="send-message">
-        <h3>Enviar Mensaje Manualmente</h3>
-        <input type="text" id="message" placeholder="Escribe tu mensaje..." required>
-        <button id="send-button"><i class="fas fa-paper-plane"></i> Enviar</button>
-    </div>
 </div>
-
-<script>
-    document.getElementById('send-button').addEventListener('click', function() {
-        const messageInput = document.getElementById('message');
-        const message = messageInput.value;
-
-        if (message.trim() === '') {
-            alert('Por favor, escribe un mensaje.');
-            return;
-        }
-
-        // Enviar el mensaje al servidor (ajusta la URL según tu lógica)
-        const chatId = prompt("Por favor, ingresa el ID del chat al que deseas enviar el mensaje:");
-        fetch('http://localhost/chat-web/api/chat.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                chat_id: chatId, // Cambia esto según la lógica de asignación de chats
-                mensaje: message,
-                cliente_id: null, // No se necesita cliente_id aquí
-                responsable_id: <?= json_encode($responsable_id) ?> // Enviar el ID del responsable
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert('Mensaje enviado: ' + data.respuesta_bot);
-            messageInput.value = ''; // Limpiar el campo de entrada
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Hubo un problema al enviar el mensaje.');
-        });
-    });
-</script>
 
 </body>
 </html>

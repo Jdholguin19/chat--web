@@ -1,7 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 require_once '../config.php';
 session_start();
 
@@ -160,10 +157,8 @@ $conn->close();
             console.error('Error:', error);
             alert('Hubo un problema al enviar el mensaje.');
         });
-
     });
 </script>
-
 
 </body>
 </html>

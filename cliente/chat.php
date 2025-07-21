@@ -3,6 +3,12 @@
 require_once '../config.php';
 session_start(); // Asegúrate de iniciar la sesión
 
+// Verificar si el usuario está autenticado
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['role']) || $_SESSION['role'] !== 'cliente') {
+    header("Location: ../login.php"); // Redirigir si no está autenticado
+    exit;
+}
+
 // Conectar a la base de datos
 $conn = connectDB();
 
@@ -125,7 +131,6 @@ function assignResponsable($conn) {
 <body>
 
 <div id="chat-container">
-    <a href="../logout.php">Cerrar Sesión</a>
     <h2>Chat con Soporte</h2>
     <div id="messages">
         <?php foreach ($mensajes as $mensaje): ?>
