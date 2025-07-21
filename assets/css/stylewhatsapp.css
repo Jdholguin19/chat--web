@@ -1,33 +1,12 @@
-/* style.css */
 
-/* Estilos generales */
-body {
-    font-family: 'Arial', sans-serif;
-    margin: 0;
-    padding: 20px;
-    background-color: #f4f4f4;
-}
-
-header {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-.banner {
-    background-color: #007bff;
-    color: white;
-    padding: 20px;
-    text-align: center;
-    border-radius: 5px;
-}
 
 /* Estilos del botón de WhatsApp */
 .Btn {
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    width: 60px;
-    height: 60px;
+    width: 50px;
+    height: 50px;
     border: none;
     border-radius: 50%;
     cursor: pointer;
@@ -101,10 +80,10 @@ header {
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     padding: 15px;
-    width: 320px; /* Aumentar el ancho */
+    width: 320px; 
     z-index: 1000;
     font-family: 'wfont_b80279_88e0cae7a7204953a2f9c7ef45bbc6ad', 'wf_88e0cae7a7204953a2f9c7ef4', 'orig_bahnschrift', sans-serif; /* Cambiar la fuente */
-    color: #0A1B4E; /* Cambiar el color del texto */
+    color: #0A1B4E; 
 }
 
 .card {
@@ -116,7 +95,7 @@ header {
 }
 
 .chat-header {
-    background-color: #0A1B4E; /* Cambiar a un color que combine */
+    background-color: #0A1B4E; 
     color: #fff;
     padding: 10px;
     font-size: 18px;
@@ -126,7 +105,7 @@ header {
 }
 
 .chat-window {
-    height: 220px;
+    height: 120px;
     overflow-y: scroll;
 }
 
@@ -154,11 +133,12 @@ header {
 .send-button {
     border: none;
     outline: none;
-    background-color: #0A1B4E; /* Cambiar a un color que combine */
+    background-color: #0A1B4E; 
     color: #fff;
     font-size: 14px;
     padding: 5px 10px;
     cursor: pointer;
+    border-radius: 10%;
 }
 
 .send-button:hover {
@@ -171,10 +151,23 @@ header {
 @media (max-width: 600px) {
     #whatsapp-chat {
         width: 90%; /* Ajustar el ancho en pantallas pequeñas */
+        bottom: 70px; /* Ajustar la posición en pantallas pequeñas */
     }
 
     .Btn {
         width: 50px; /* Ajustar el tamaño del botón en pantallas pequeñas */
         height: 50px;
+    }
+
+    .chat-header {
+        font-size: 16px; /* Ajustar el tamaño de la fuente en pantallas pequeñas */
+    }
+
+    .message-input {
+        font-size: 12px; /* Ajustar el tamaño de la fuente en pantallas pequeñas */
+    }
+
+    .send-button {
+        font-size: 12px; /* Ajustar el tamaño de la fuente en pantallas pequeñas */
     }
 }
