@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Validar que se recibieron los parámetros necesarios
     if (isset($input['mensaje']) && isset($input['cliente_id'])) {
         $mensaje = $input['mensaje'];
-        $cliente_id = $input['cliente_id'];
+        $cliente_id = $input['cliente_id']; // Asegúrate de que 'cliente_id' se envíe en la solicitud
 
         // Conectar a la base de datos
         $conn = connectDB();
