@@ -24,6 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['whatsapp_message'])) 
     <title>Página Principal</title>
     <link rel="stylesheet" href="assets/css/stylewhatsapp.css"> <!-- Incluir archivos CSS -->
     <link rel="stylesheet" href="assets/css/stylebanner.css">
+    <link rel="stylesheet" href="assets/css/stylebody.css">
 </head>
 <body>
 
@@ -52,6 +53,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['whatsapp_message'])) 
         </div>
 
     </header>
+
+
+    <div class="video-background">
+        <video autoplay muted loop class="background-video">
+            <source src="https://video.wixstatic.com/video/11062b_d709906efd694f14a91f3da1774cdbba/1080p/mp4/file.mp4" type="video/mp4">
+            Tu navegador no soporta el video.
+        </video>
+        <div class="content">
+            <div class="left-section">
+                <a href="login.php" target="_self" class="contact-button">Iniciar Sesión</a>
+                <p class="location-text">En el km 19 de la Vía a la Costa.</p>
+            </div>
+            <div class="right-section">
+                <h1 class="main-title">La <span class="highlight">mejor urbanización</span> en casas, terrenos y departamentos de la Vía a la Costa.</h1>
+            </div>
+        </div>
+    </div>
 
     <button class="Btn" onclick="toggleWhatsAppChat()">   <!-- Svg de la imagen de whatsapp -->
         <div class="sign">

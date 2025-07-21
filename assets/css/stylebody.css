@@ -1,0 +1,206 @@
+* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'wfont_b80279_88e0cae7a7204953a2f9c7ef45bbc6ad', 'wf_88e0cae7a7204953a2f9c7ef4', 'orig_bahnschrift', sans-serif; 
+        }
+
+        .video-background {
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+        }
+
+        .background-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+        }
+
+        /* Overlay oscuro para mejorar la legibilidad */
+        .video-background::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 0;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 40px;
+            gap: 60px;
+        }
+
+        .left-section {
+            flex: 0 0 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .contact-button {
+            background: linear-gradient(135deg, #0066cc, #004499);
+            color: white;
+            padding: 20px 40px;
+            text-decoration: none;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 1.8rem;
+            box-shadow: 0 8px 25px rgba(0, 102, 204, 0.3);
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(5px);
+            margin-bottom: 15px;
+        }
+
+        .contact-button:hover {
+            background: linear-gradient(135deg, #0052a3, #003366);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0, 102, 204, 0.4);
+        }
+
+        .location-text {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            opacity: 0.9;
+        }
+
+        .right-section {
+            flex: 1;
+            text-align: left;
+        }
+
+        .main-title {     /* Titulo principal*/
+            color: white;
+            font-size: 2.5rem;
+            font-weight: bold;
+            line-height: 1.2;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.7);
+            margin: 0;
+        }
+
+        .highlight {
+            color: #ffeb3b;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .content {
+                padding: 0 30px;
+                gap: 40px;
+            }
+            
+            .main-title {
+                font-size: 2.8rem;
+            }
+            
+            .left-section {
+                flex: 0 0 280px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+                justify-content: center;
+                text-align: center;
+                padding: 40px 20px;
+                gap: 40px;
+            }
+
+            .left-section {
+                flex: none;
+                order: 2;
+            }
+
+            .right-section {
+                flex: none;
+                order: 1;
+                text-align: center;
+            }
+
+            .main-title {
+                font-size: 2.2rem;
+                margin-bottom: 30px;
+            }
+
+            .contact-button {
+                font-size: 1.5rem;
+                padding: 18px 35px;
+            }
+
+            .location-text {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-title {
+                font-size: 1.8rem;
+            }
+
+            .contact-button {
+                font-size: 1.3rem;
+                padding: 15px 30px;
+            }
+
+            .content {
+                padding: 30px 15px;
+                gap: 30px;
+            }
+
+            .location-text {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Animaciones sutiles */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .content {
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .contact-button {
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .location-text {
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }

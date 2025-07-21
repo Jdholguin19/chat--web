@@ -2,20 +2,29 @@
     box-sizing: border-box;
 }
 
-body {
-    font-family: 'wfont_b80279_88e0cae7a7204953a2f9c7ef45bbc6ad', 'wf_88e0cae7a7204953a2f9c7ef4', 'orig_bahnschrift', sans-serif; 
-    margin: 0;
-    padding: 0;
-}
+        body {
+            font-family: 'wfont_b80279_88e0cae7a7204953a2f9c7ef45bbc6ad', 'wf_88e0cae7a7204953a2f9c7ef4', 'orig_bahnschrift', sans-serif; 
+            margin: 0;
+            padding: 0;
+            /* Agregar padding-top para compensar el header fijo */
+            padding-top: 80px;
+        }
 
-.site-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #ffffff;
-    padding: 15px 30px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
+        .site-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 15px 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            /* Propiedades para hacer el header estático */
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 1000;
+        }
 
 .logo img {
     height: 50px; /* Ajusta la altura según tu logo */
