@@ -53,7 +53,7 @@ $conn->close();
         <nav class="navbar">
             <ul>
                 <li><a href="../index.php">CostaSol</a></li>
-                <li><a href="../logout.php" class="logout-btn">Cerrar Sesión</a></li>
+                <li><a href="panel.php" class="logout-btn"><i class="fas fa-arrow-left"></i> Voler</a></li>
             </ul>
         </nav>
         <div class="social-icons">
