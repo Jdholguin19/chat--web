@@ -1,7 +1,7 @@
 <?php
 // Incluir el archivo de configuración para la conexión a la base de datos
 require_once '../config.php';
-session_start(); // Asegúrate de iniciar la sesión
+session_start(); // iniciar la sesión
 
 // Conectar a la base de datos
 $conn = connectDB();

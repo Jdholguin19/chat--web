@@ -125,6 +125,7 @@ $conn->close();
         setInterval(loadMessages, 2000);
 
         // Función para enviar mensaje
+        // Función para enviar mensaje
         function sendMessage() {
             const messageInput = document.getElementById('message');
             const message = messageInput.value;
@@ -141,9 +142,9 @@ $conn->close();
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    chat_id: <?= json_encode($chat_id) ?>, // Enviar el ID del chat
                     mensaje: message,
-                    cliente_id: <?= json_encode($cliente_id) ?> // Enviar el ID del cliente
+                    responsable_id: <?= json_encode($_SESSION['user_id']) ?>, // ID del responsable
+                    chat_id: <?= json_encode($chat_id) ?> // ID del chat
                 })
             })
             .then(response => response.json())
@@ -168,6 +169,7 @@ $conn->close();
                 alert('Hubo un problema al enviar el mensaje.');
             });
         }
+
 
         // Event listeners
         document.getElementById('send-button').addEventListener('click', sendMessage);

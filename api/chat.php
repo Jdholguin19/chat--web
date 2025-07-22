@@ -59,6 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
     } catch (Exception $e) {
+        logError($e->getMessage());
         echo json_encode(['error' => $e->getMessage()]);
     } finally {
         $conn->close();
@@ -144,4 +145,9 @@ function registerAccess($conn, $user_id) {
     $stmt->bind_param("is", $user_id, $ip);
     $stmt->execute();
     $stmt->close();
+}
+
+function logError($message) {
+    $logFile = '../logs/error.log';
+    file_put_contents($logFile, date('Y-m-d H:i:s') . " - " . $message . PHP_EOL, FILE_APPEND);
 }
