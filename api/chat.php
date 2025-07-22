@@ -30,14 +30,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Guardar mensaje del cliente
             saveMessage($conn, $chat_id, 'cliente', $input['mensaje'], 0);
             
-            // Generar y guardar respuesta automática del bot
-            $respuesta_bot = getBotResponse($input['mensaje'], $conn);
-            saveMessage($conn, $chat_id, 'bot', $respuesta_bot, 1);
+            // Verificar si el bot está activo para este chat antes de generar respuesta
+            $bot_response = '';
+            if (isBotActive($conn, $chat_id)) {
+                // Generar y guardar respuesta automática del bot
+                $respuesta_bot = getBotResponse($input['mensaje'], $conn);
+                saveMessage($conn, $chat_id, 'bot', $respuesta_bot, 1);
+                $bot_response = $respuesta_bot;
+            }
             
             echo json_encode([
                 'success' => true,
                 'mensaje_cliente' => $input['mensaje'],
-                'respuesta_bot' => $respuesta_bot,
+                'respuesta_bot' => $bot_response,
+                'bot_activo' => isBotActive($conn, $chat_id),
                 'chat_id' => $chat_id
             ]);
             
@@ -88,8 +94,8 @@ function getOrCreateChat($conn, $cliente_id) {
         throw new Exception('No hay responsables disponibles');
     }
 
-    // Crear nuevo chat
-    $stmt = $conn->prepare("INSERT INTO chats (cliente_id, responsable_id, abierto) VALUES (?, ?, 1)");
+    // Crear nuevo chat (bot activo por defecto)
+    $stmt = $conn->prepare("INSERT INTO chats (cliente_id, responsable_id, abierto, bot_activo) VALUES (?, ?, 1, 1)");
     $stmt->bind_param("ii", $cliente_id, $responsable_id);
     $stmt->execute();
     $chat_id = $stmt->insert_id;
@@ -102,6 +108,22 @@ function getOrCreateChat($conn, $cliente_id) {
     $stmt->close();
     
     return $chat_id;
+}
+
+function isBotActive($conn, $chat_id) {
+    $stmt = $conn->prepare("SELECT bot_activo FROM chats WHERE id = ?");
+    $stmt->bind_param("i", $chat_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $stmt->close();
+        return (bool) $row['bot_activo'];
+    }
+    
+    $stmt->close();
+    return true; // Por defecto activo si no se encuentra
 }
 
 function saveMessage($conn, $chat_id, $remitente, $contenido, $leido) { // Guardar mensaje en la base de datos
@@ -152,5 +174,6 @@ function registerAccess($conn, $user_id) {   // registrar acceso del cliente
 function logError($message) {
     $logFile = '../logs/error_log.log'; // Ruta del archivo de log
     $currentDate = date('Y-m-d H:i:s');
-    file_put_contents($logFile, "[$currentDate] Mensaje enviado: $message\n", FILE_APPEND);
+    file_put_contents($logFile, "[$currentDate] Error: $message\n", FILE_APPEND);
 }
+?>

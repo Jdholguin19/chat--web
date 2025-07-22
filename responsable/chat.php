@@ -24,15 +24,16 @@ if ($chat_id <= 0) {
     exit;
 }
 
-// Obtener los mensajes del chat y el cliente_id
-$stmt = $conn->prepare("SELECT contenido, fecha, remitente, c.cliente_id FROM mensajes m JOIN chats c ON m.chat_id = c.id WHERE m.chat_id = ? ORDER BY m.fecha ASC");
+// Obtener los mensajes del chat, el cliente_id y el estado del bot
+$stmt = $conn->prepare("SELECT m.contenido, m.fecha, m.remitente, c.cliente_id, c.bot_activo FROM mensajes m JOIN chats c ON m.chat_id = c.id WHERE m.chat_id = ? ORDER BY m.fecha ASC");
 $stmt->bind_param("i", $chat_id);
 $stmt->execute();
 $result = $stmt->get_result();
 $mensajes = $result->fetch_all(MYSQLI_ASSOC);
 
-// Obtener el cliente_id
-$cliente_id = $mensajes[0]['cliente_id'] ?? null; // Obtener el cliente_id del primer mensaje
+// Obtener el cliente_id y estado del bot
+$cliente_id = $mensajes[0]['cliente_id'] ?? null;
+$bot_activo = $mensajes[0]['bot_activo'] ?? 1; // Por defecto activo
 
 $stmt->close();
 $conn->close();
@@ -46,6 +47,49 @@ $conn->close();
     <title>Chat Responsable - CostaSol</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <link rel="stylesheet" href="../assets/css/stylechatres.css">
+    <style>
+        .bot-control {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .bot-toggle-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .bot-active {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .bot-inactive {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .bot-status {
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .bot-status.active {
+            color: #28a745;
+        }
+        
+        .bot-status.inactive {
+            color: #dc3545;
+        }
+    </style>
 </head>
 <body>
 
@@ -54,7 +98,7 @@ $conn->close();
         <nav class="navbar">
             <ul>
                 <li><a href="../index.php">CostaSol</a></li>
-                <li><a href="panel.php" class="logout-btn"><i class="fas fa-arrow-left"></i> Voler</a></li>
+                <li><a href="panel.php" class="logout-btn"><i class="fas fa-arrow-left"></i> Volver</a></li>
             </ul>
         </nav>
         <div class="social-icons">
@@ -77,6 +121,17 @@ $conn->close();
     <div id="chat-container">
         <div class="chat-header">
             <h2>Chat con Cliente</h2>
+            <!-- Control del Bot -->
+            <div class="bot-control">
+                <span>Estado del Bot:</span>
+                <span id="bot-status" class="bot-status <?= $bot_activo ? 'active' : 'inactive' ?>">
+                    <?= $bot_activo ? 'ACTIVO' : 'INACTIVO' ?>
+                </span>
+                <button id="toggle-bot" class="bot-toggle-btn <?= $bot_activo ? 'bot-active' : 'bot-inactive' ?>">
+                    <i class="fas <?= $bot_activo ? 'fa-robot' : 'fa-user' ?>"></i>
+                    <?= $bot_activo ? 'Desactivar Bot' : 'Activar Bot' ?>
+                </button>
+            </div>
         </div>
         <div id="messages">
         <?php foreach ($mensajes as $mensaje): ?>
@@ -122,6 +177,56 @@ $conn->close();
     </div>
 
     <script>
+        let botActivo = <?= json_encode($bot_activo) ?>;
+
+        // Función para alternar el estado del bot
+        function toggleBot() {
+            fetch('http://localhost/chat-web/api/toggle_bot.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chat_id: <?= json_encode($chat_id) ?>,
+                    responsable_id: <?= json_encode($_SESSION['user_id']) ?>
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    botActivo = data.bot_activo;
+                    updateBotUI();
+                } else {
+                    alert('Error al cambiar el estado del bot: ' + (data.error || 'Error desconocido'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Hubo un problema al cambiar el estado del bot.');
+            });
+        }
+
+        // Función para actualizar la UI del bot
+        function updateBotUI() {
+            const toggleBtn = document.getElementById('toggle-bot');
+            const statusSpan = document.getElementById('bot-status');
+            
+            if (botActivo) {
+                toggleBtn.className = 'bot-toggle-btn bot-active';
+                toggleBtn.innerHTML = '<i class="fas fa-robot"></i> Desactivar Bot';
+                statusSpan.textContent = 'ACTIVO';
+                statusSpan.className = 'bot-status active';
+            } else {
+                toggleBtn.className = 'bot-toggle-btn bot-inactive';
+                toggleBtn.innerHTML = '<i class="fas fa-user"></i> Activar Bot';
+                statusSpan.textContent = 'INACTIVO';
+                statusSpan.className = 'bot-status inactive';
+            }
+        }
+
+        // Event listener para el botón de toggle del bot
+        document.getElementById('toggle-bot').addEventListener('click', toggleBot);
+
         // Función para cargar mensajes
         function loadMessages() {
             fetch('http://localhost/chat-web/api/get_messages.php?chat_id=<?= json_encode($chat_id) ?>')
