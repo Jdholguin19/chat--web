@@ -1,4 +1,5 @@
 <?php
+// api/chat.php
 require_once '../config.php';
 header('Content-Type: application/json');
 
@@ -87,6 +88,7 @@ function getOrCreateChat($conn, $cliente_id) {
         throw new Exception('No hay responsables disponibles');
     }
 
+    // Crear nuevo chat
     $stmt = $conn->prepare("INSERT INTO chats (cliente_id, responsable_id, abierto) VALUES (?, ?, 1)");
     $stmt->bind_param("ii", $cliente_id, $responsable_id);
     $stmt->execute();
@@ -102,7 +104,7 @@ function getOrCreateChat($conn, $cliente_id) {
     return $chat_id;
 }
 
-function saveMessage($conn, $chat_id, $remitente, $contenido, $leido) {
+function saveMessage($conn, $chat_id, $remitente, $contenido, $leido) { // Guardar mensaje en la base de datos
     $stmt = $conn->prepare("INSERT INTO mensajes (chat_id, remitente, contenido, fecha, leido) VALUES (?, ?, ?, NOW(), ?)");
     $stmt->bind_param("issi", $chat_id, $remitente, $contenido, $leido);
     if (!$stmt->execute()) {
@@ -111,7 +113,7 @@ function saveMessage($conn, $chat_id, $remitente, $contenido, $leido) {
     $stmt->close();
 }
 
-function assignResponsable($conn) {
+function assignResponsable($conn) { // Asignar un responsable con menos chats activos
     $query = "SELECT r.user_id 
               FROM responsables r
               LEFT JOIN chats c ON r.user_id = c.responsable_id AND c.abierto = 1
@@ -123,7 +125,7 @@ function assignResponsable($conn) {
     return ($result->num_rows > 0) ? $result->fetch_assoc()['user_id'] : null;
 }
 
-function getBotResponse($mensaje, $conn) {
+function getBotResponse($mensaje, $conn) { // Generar respuesta automática del bot
     $stmt = $conn->prepare("SELECT texto, palabras_clave FROM mensajes_pred WHERE tipo = 'bot'");
     $stmt->execute();
     $result = $stmt->get_result();
@@ -139,7 +141,7 @@ function getBotResponse($mensaje, $conn) {
     return "Gracias por tu mensaje. Un responsable te atenderá pronto.";
 }
 
-function registerAccess($conn, $user_id) {
+function registerAccess($conn, $user_id) {   // registrar acceso del cliente
     $ip = $_SERVER['REMOTE_ADDR'];
     $stmt = $conn->prepare("INSERT INTO accesos (user_id, fecha, ip) VALUES (?, NOW(), ?)");
     $stmt->bind_param("is", $user_id, $ip);
@@ -148,6 +150,7 @@ function registerAccess($conn, $user_id) {
 }
 
 function logError($message) {
-    $logFile = '../logs/error.log';
-    file_put_contents($logFile, date('Y-m-d H:i:s') . " - " . $message . PHP_EOL, FILE_APPEND);
+    $logFile = '../logs/error_log.log'; // Ruta del archivo de log
+    $currentDate = date('Y-m-d H:i:s');
+    file_put_contents($logFile, "[$currentDate] Mensaje enviado: $message\n", FILE_APPEND);
 }

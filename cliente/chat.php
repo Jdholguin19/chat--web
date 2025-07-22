@@ -1,4 +1,5 @@
 <?php
+// cliente/chat.php
 // Incluir el archivo de configuración para la conexión a la base de datos
 require_once '../config.php';
 session_start(); // iniciar la sesión
@@ -41,8 +42,8 @@ if ($result->num_rows > 0) {
     $stmt->close();
 }
 
-// Obtener mensajes anteriores del chat
-$stmt = $conn->prepare("SELECT contenido, fecha FROM mensajes WHERE chat_id = ? ORDER BY fecha ASC");
+// Obtener mensajes anteriores del chat incluyendo el remitente
+$stmt = $conn->prepare("SELECT remitente, contenido, fecha FROM mensajes WHERE chat_id = ? ORDER BY fecha ASC");
 $stmt->bind_param("i", $chat_id);
 $stmt->execute();
 $result = $stmt->get_result();
@@ -114,10 +115,32 @@ function assignResponsable($conn) {
                 </a>
             </div>
             
-            <div id="messages">
+            <div id="messages"> 
                 <?php foreach ($mensajes as $mensaje): ?>
-                    <div class="message">
-                        <strong>Cliente:</strong> <?= htmlspecialchars($mensaje['contenido']) ?> 
+                    <?php 
+                        $senderName = '';
+                        $messageClass = '';
+                        
+                        switch($mensaje['remitente']) {
+                            case 'cliente':
+                                $senderName = 'Cliente';
+                                $messageClass = 'message-cliente';
+                                break;
+                            case 'bot':
+                                $senderName = 'Bot';
+                                $messageClass = 'message-bot';
+                                break;
+                            case 'resp':
+                                $senderName = 'Responsable';
+                                $messageClass = 'message-responsable';
+                                break;
+                            default:
+                                $senderName = 'Sistema';
+                                $messageClass = 'message-sistema';
+                        }
+                    ?>
+                    <div class="message <?= $messageClass ?>">
+                        <strong><?= $senderName ?>:</strong> <?= htmlspecialchars($mensaje['contenido']) ?> 
                         <em>(<?= $mensaje['fecha'] ?>)</em>
                     </div>
                 <?php endforeach; ?>
@@ -141,7 +164,30 @@ function assignResponsable($conn) {
                 const messagesContainer = document.getElementById('messages');
                 messagesContainer.innerHTML = ''; // Limpiar mensajes anteriores
                 data.mensajes.forEach(mensaje => {
-                    messagesContainer.innerHTML += `<div class="message"><strong>Cliente:</strong> ${mensaje.contenido} <em>(${mensaje.fecha})</em></div>`;
+                    let senderName = '';
+                    let messageClass = '';
+                    
+                    // Determinar el nombre del remitente 
+                    switch(mensaje.remitente) {
+                        case 'cliente':
+                            senderName = 'Cliente';
+                            messageClass = 'message-cliente';
+                            break;
+                        case 'bot':
+                            senderName = 'Bot';
+                            messageClass = 'message-bot';
+                            break;
+                        case 'resp':
+                            senderName = 'Responsable';
+                            messageClass = 'message-responsable';
+                            break;
+                        default:
+                            senderName = 'Sistema';
+                            messageClass = 'message-sistema';
+                    }
+                    
+                    // Crear el elemento del mensaje con la clase correspondiente
+                    messagesContainer.innerHTML += `<div class="message ${messageClass}"><strong>${senderName}:</strong> ${mensaje.contenido} <em>(${mensaje.fecha})</em></div>`;
                 });
                 messagesContainer.scrollTop = messagesContainer.scrollHeight; // Desplazar hacia abajo
             })
@@ -174,12 +220,15 @@ function assignResponsable($conn) {
         })
         .then(response => response.json())
         .then(data => {
-            // Mostrar el mensaje enviado en el feed
-            const messagesDiv = document.getElementById('messages');
-            messagesDiv.innerHTML += `<div class="message"><strong>Cliente:</strong> ${message} <em>(Ahora)</em></div>`;
-            messagesDiv.innerHTML += `<div class="message"><strong>Bot:</strong> ${data.respuesta_bot} <em>(Ahora)</em></div>`;
-            messagesDiv.scrollTop = messagesDiv.scrollHeight; // Desplazar hacia abajo
-            messageInput.value = ''; // Limpiar el campo de entrada
+            if (data.success) {
+                // Limpiar el campo de entrada
+                messageInput.value = '';
+                // Cargar mensajes actualizados (esto mostrará tanto el mensaje del cliente como la respuesta del bot)
+                loadMessages();
+            } else {
+                console.error('Error en la respuesta:', data.error);
+                alert('Hubo un problema al enviar el mensaje.');
+            }
         })
         .catch(error => {
             console.error('Error:', error);

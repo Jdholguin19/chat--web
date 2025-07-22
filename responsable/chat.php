@@ -1,4 +1,5 @@
 <?php
+// responsable/chat.php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -78,15 +79,38 @@ $conn->close();
             <h2>Chat con Cliente</h2>
         </div>
         <div id="messages">
-            <?php foreach ($mensajes as $mensaje): ?>
-                <div class="message <?= $mensaje['remitente'] === 'responsable' ? 'responsable' : 'cliente' ?>">
-                    <div class="message-sender">
-                        <?= htmlspecialchars($mensaje['remitente'] === 'responsable' ? 'Responsable' : 'Cliente') ?>
-                    </div>
-                    <div><?= htmlspecialchars($mensaje['contenido']) ?></div>
-                    <div class="message-time"><?= $mensaje['fecha'] ?></div>
+        <?php foreach ($mensajes as $mensaje): ?>
+            <?php 
+                $senderName = '';
+                $messageClass = '';
+                
+                // Determinar el nombre del remitente y la clase CSS
+                switch($mensaje['remitente']) {
+                    case 'cliente':
+                        $senderName = 'Cliente';
+                        $messageClass = 'cliente';
+                        break;
+                    case 'bot':
+                        $senderName = 'Bot';
+                        $messageClass = 'cliente'; // O puedes crear una clase específica para bot
+                        break;
+                    case 'resp':
+                        $senderName = 'Responsable';
+                        $messageClass = 'responsable';
+                        break;
+                    default:
+                        $senderName = 'Sistema';
+                        $messageClass = 'cliente';
+                }
+            ?>
+            <div class="message <?= $messageClass ?>">
+                <div class="message-sender">
+                    <?= htmlspecialchars($senderName) ?>
                 </div>
-            <?php endforeach; ?>
+                <div><?= htmlspecialchars($mensaje['contenido']) ?></div>
+                <div class="message-time"><?= $mensaje['fecha'] ?></div>
+            </div>
+        <?php endforeach; ?>
         </div>
         <div id="message-input">
             <input type="text" id="message" placeholder="Escribe tu mensaje..." required>
@@ -106,8 +130,27 @@ $conn->close();
                     const messagesContainer = document.getElementById('messages');
                     messagesContainer.innerHTML = ''; // Limpiar mensajes anteriores
                     data.mensajes.forEach(mensaje => {
-                        const messageClass = mensaje.remitente === 'responsable' ? 'responsable' : 'cliente';
-                        const senderName = mensaje.remitente === 'responsable' ? 'Responsable' : 'Cliente';
+                        let senderName = '';
+                        let messageClass = '';
+                        
+                        // Determinar el nombre del remitente y la clase CSS
+                        switch(mensaje.remitente) {
+                            case 'cliente':
+                                senderName = 'Cliente';
+                                messageClass = 'cliente';
+                                break;
+                            case 'bot':
+                                senderName = 'Bot';
+                                messageClass = 'cliente'; // O puedes crear una clase específica para bot
+                                break;
+                            case 'resp':
+                                senderName = 'Responsable';
+                                messageClass = 'responsable';
+                                break;
+                            default:
+                                senderName = 'Sistema';
+                                messageClass = 'cliente';
+                        }
                         
                         messagesContainer.innerHTML += `
                             <div class="message ${messageClass}">
@@ -124,7 +167,6 @@ $conn->close();
         // Llamar a loadMessages cada 2 segundos
         setInterval(loadMessages, 2000);
 
-        // Función para enviar mensaje
         // Función para enviar mensaje
         function sendMessage() {
             const messageInput = document.getElementById('message');
@@ -152,16 +194,10 @@ $conn->close();
                 if (data.error) {
                     alert('Error: ' + data.error);
                 } else {
-                    // Mostrar el mensaje enviado en el feed
-                    const messagesDiv = document.getElementById('messages');
-                    messagesDiv.innerHTML += `
-                        <div class="message responsable">
-                            <div class="message-sender">Responsable</div>
-                            <div>${message}</div>
-                            <div class="message-time">Ahora</div>
-                        </div>`;
-                    messagesDiv.scrollTop = messagesDiv.scrollHeight; // Desplazar hacia abajo
-                    messageInput.value = ''; // Limpiar el campo de entrada
+                    // Limpiar el campo de entrada
+                    messageInput.value = '';
+                    // Cargar mensajes actualizados
+                    loadMessages();
                 }
             })
             .catch(error => {
@@ -169,7 +205,6 @@ $conn->close();
                 alert('Hubo un problema al enviar el mensaje.');
             });
         }
-
 
         // Event listeners
         document.getElementById('send-button').addEventListener('click', sendMessage);
