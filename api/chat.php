@@ -1,135 +1,147 @@
 <?php
-// Incluir el archivo de configuración para la conexión a la base de datos
 require_once '../config.php';
-
-// Establecer el encabezado de respuesta como JSON
 header('Content-Type: application/json');
 
 // Manejar la solicitud POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Obtener el cuerpo de la solicitud
     $input = json_decode(file_get_contents('php://input'), true);
 
-    // Validar que se recibieron los parámetros necesarios
-    if (isset($input['mensaje']) && isset($input['cliente_id'])) {
-        $mensaje = $input['mensaje'];
-        $cliente_id = $input['cliente_id']; // Asegúrate de que 'cliente_id' se envíe en la solicitud
+    // Validar parámetros básicos
+    if (!isset($input['mensaje'])) {
+        echo json_encode(['error' => 'Falta el mensaje']);
+        exit;
+    }
 
-        // Conectar a la base de datos
-        $conn = connectDB();
-
-        // Registrar el acceso del cliente
-        registerAccess($conn, $cliente_id);
-
-        // Verificar si el cliente ya tiene un chat abierto
-        $stmt = $conn->prepare("SELECT id FROM chats WHERE cliente_id = ? AND abierto = 1");
-        $stmt->bind_param("i", $cliente_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        // Si no hay chat abierto, asignar un responsable
-        if ($result->num_rows === 0) {
-            $responsable_id = assignResponsable($conn);
-            if ($responsable_id === null) {
-                echo json_encode(['error' => 'No hay responsables disponibles.']);
-                exit;
-            }
-
-            // Crear un nuevo registro en la tabla chats
-            $stmt = $conn->prepare("INSERT INTO chats (cliente_id, responsable_id, abierto) VALUES (?, ?, 1)");
-            $stmt->bind_param("ii", $cliente_id, $responsable_id);
-            $stmt->execute();
-            $chat_id = $stmt->insert_id; // Obtener el ID del nuevo chat
-            $stmt->close();
-
-            // Crear un registro en la tabla asignaciones
-            $stmt = $conn->prepare("INSERT INTO asignaciones (cliente_id, responsable_id, fecha) VALUES (?, ?, NOW())");
-            $stmt->bind_param("ii", $cliente_id, $responsable_id);
-            $stmt->execute();
-            $stmt->close();
+    $conn = connectDB();
+    
+    try {
+        // Determinar el tipo de remitente
+        if (isset($input['cliente_id'])) {  // Mensaje desde cliente
+            $tipo_remitente = 'cliente';
+            $user_id = $input['cliente_id'];
+            
+            // Registrar acceso del cliente
+            registerAccess($conn, $user_id);
+            
+            // Buscar o crear chat
+            $chat_id = getOrCreateChat($conn, $user_id);
+            
+            // Guardar mensaje del cliente
+            saveMessage($conn, $chat_id, 'cliente', $input['mensaje'], 0);
+            
+            // Generar y guardar respuesta automática del bot
+            $respuesta_bot = getBotResponse($input['mensaje'], $conn);
+            saveMessage($conn, $chat_id, 'bot', $respuesta_bot, 1);
+            
+            echo json_encode([
+                'success' => true,
+                'mensaje_cliente' => $input['mensaje'],
+                'respuesta_bot' => $respuesta_bot,
+                'chat_id' => $chat_id
+            ]);
+            
+        } elseif (isset($input['responsable_id']) && isset($input['chat_id'])) {  // Mensaje desde responsable
+            $tipo_remitente = 'resp';
+            $user_id = $input['responsable_id'];
+            $chat_id = $input['chat_id'];
+            
+            // Guardar mensaje del responsable
+            saveMessage($conn, $chat_id, 'resp', $input['mensaje'], 0);
+            
+            echo json_encode([
+                'success' => true,
+                'mensaje_responsable' => $input['mensaje'],
+                'chat_id' => $chat_id
+            ]);
+            
         } else {
-            // Si ya hay un chat abierto, obtener el chat_id
-            $row = $result->fetch_assoc();
-            $chat_id = $row['id'];
+            echo json_encode(['error' => 'Faltan parámetros necesarios']);
         }
-
-        // Guardar el mensaje en la base de datos
-        $stmt = $conn->prepare("INSERT INTO mensajes (chat_id, remitente, contenido, fecha, leido) VALUES (?, 'responsable', ?, NOW(), 0)");
-        $stmt->bind_param("is", $chat_id, $mensaje);
-        $stmt->execute();
-
-        // Obtener la respuesta del bot
-        $respuesta_bot = getBotResponse($mensaje, $conn);
-
-        // Guardar la respuesta del bot en la base de datos
-        $stmt = $conn->prepare("INSERT INTO mensajes (chat_id, remitente, contenido, fecha, leido) VALUES (?, 'bot', ?, NOW(), 1)");
-        $stmt->bind_param("is", $chat_id, $respuesta_bot);
-        $stmt->execute();
-
-        // Cerrar la conexión
-        $stmt->close();
+        
+    } catch (Exception $e) {
+        echo json_encode(['error' => $e->getMessage()]);
+    } finally {
         $conn->close();
-
-        // Responder con el mensaje guardado y la respuesta del bot
-        echo json_encode([
-            'mensaje_guardado' => $mensaje,
-            'respuesta_bot' => $respuesta_bot,
-            'chat_id' => $chat_id // Devolver el chat_id
-        ]);
-    } else {
-        // Responder con un error si faltan parámetros
-        echo json_encode(['error' => 'Faltan parámetros necesarios.']);
     }
 } else {
-    // Responder con un error si no es un método POST
-    echo json_encode(['error' => 'Método no permitido.']);
+    echo json_encode(['error' => 'Método no permitido']);
 }
 
-// Función para obtener la respuesta del bot
+function getOrCreateChat($conn, $cliente_id) {
+    // Buscar chat abierto existente
+    $stmt = $conn->prepare("SELECT id FROM chats WHERE cliente_id = ? AND abierto = 1 LIMIT 1");
+    $stmt->bind_param("i", $cliente_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $stmt->close();
+        return $row['id'];
+    }
+    
+    // Si no existe, crear nuevo chat
+    $responsable_id = assignResponsable($conn);
+    if ($responsable_id === null) {
+        throw new Exception('No hay responsables disponibles');
+    }
+
+    $stmt = $conn->prepare("INSERT INTO chats (cliente_id, responsable_id, abierto) VALUES (?, ?, 1)");
+    $stmt->bind_param("ii", $cliente_id, $responsable_id);
+    $stmt->execute();
+    $chat_id = $stmt->insert_id;
+    $stmt->close();
+    
+    // Registrar asignación
+    $stmt = $conn->prepare("INSERT INTO asignaciones (cliente_id, responsable_id, fecha) VALUES (?, ?, NOW())");
+    $stmt->bind_param("ii", $cliente_id, $responsable_id);
+    $stmt->execute();
+    $stmt->close();
+    
+    return $chat_id;
+}
+
+function saveMessage($conn, $chat_id, $remitente, $contenido, $leido) {
+    $stmt = $conn->prepare("INSERT INTO mensajes (chat_id, remitente, contenido, fecha, leido) VALUES (?, ?, ?, NOW(), ?)");
+    $stmt->bind_param("issi", $chat_id, $remitente, $contenido, $leido);
+    if (!$stmt->execute()) {
+        throw new Exception("Error al guardar mensaje: " . $conn->error);
+    }
+    $stmt->close();
+}
+
+function assignResponsable($conn) {
+    $query = "SELECT r.user_id 
+              FROM responsables r
+              LEFT JOIN chats c ON r.user_id = c.responsable_id AND c.abierto = 1
+              GROUP BY r.user_id
+              ORDER BY COUNT(c.id) ASC, RAND()
+              LIMIT 1";
+    
+    $result = $conn->query($query);
+    return ($result->num_rows > 0) ? $result->fetch_assoc()['user_id'] : null;
+}
+
 function getBotResponse($mensaje, $conn) {
-    // Lógica de respuesta: buscar palabras clave en la tabla mensajes_pred
     $stmt = $conn->prepare("SELECT texto, palabras_clave FROM mensajes_pred WHERE tipo = 'bot'");
     $stmt->execute();
     $result = $stmt->get_result();
 
     while ($row = $result->fetch_assoc()) {
-        // Comprobar si alguna de las palabras clave está en el mensaje
-        $palabras_clave = explode(',', $row['palabras_clave']);
-        foreach ($palabras_clave as $palabra) {
-            if (stripos($mensaje, trim($palabra)) !== false) {
-                return $row['texto']; // Devolver la respuesta si se encuentra una palabra clave
+        $keywords = array_map('trim', explode(',', $row['palabras_clave']));
+        foreach ($keywords as $keyword) {
+            if (stripos($mensaje, $keyword) !== false) {
+                return $row['texto'];
             }
         }
     }
-
-    return "Lo siento, no tengo una respuesta para eso."; // Respuesta por defecto
+    return "Gracias por tu mensaje. Un responsable te atenderá pronto.";
 }
 
-// Función para asignar un responsable con menos chats activos
-function assignResponsable($conn) {
-    // Seleccionar al responsable con menos chats activos
-    $stmt = $conn->prepare("SELECT r.user_id FROM responsables r
-                             LEFT JOIN chats c ON r.user_id = c.responsable_id AND c.abierto = 1
-                             GROUP BY r.user_id
-                             ORDER BY COUNT(c.id) ASC
-                             LIMIT 1");
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        return $row['user_id']; // Devolver el ID del responsable
-    }
-
-    return null; // No hay responsables disponibles
-}
-
-// Función para registrar el acceso del usuario
 function registerAccess($conn, $user_id) {
+    $ip = $_SERVER['REMOTE_ADDR'];
     $stmt = $conn->prepare("INSERT INTO accesos (user_id, fecha, ip) VALUES (?, NOW(), ?)");
-    $ip_address = $_SERVER['REMOTE_ADDR']; // Obtener la dirección IP del usuario
-    $stmt->bind_param("is", $user_id, $ip_address);
+    $stmt->bind_param("is", $user_id, $ip);
     $stmt->execute();
     $stmt->close();
 }
-?>

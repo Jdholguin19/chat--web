@@ -73,7 +73,7 @@ $conn->close();
         
         <?php if (count($chats) > 0): ?>
             <?php foreach ($chats as $chat): ?>
-                <div class="chat-item">
+                <div class="chat-item" data-chat-id="<?= $chat['chat_id'] ?>">
                     <a class="chat-link" href="chat.php?chat_id=<?= $chat['chat_id'] ?>">
                         <div class="client-name">
                             <?= htmlspecialchars($chat['cliente_nombre']) ?>
@@ -103,6 +103,38 @@ $conn->close();
     </div>
 
     <script>
+        // Función para actualizar los mensajes no leídos
+    function updateUnreadMessages() {
+        fetch('http://localhost/chat-web/api/get_unread_messages.php')
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.chats); // Imprimir solo el array de chats
+                if (data.chats) {
+                    data.chats.forEach(chat => {
+                        const chatItem = document.querySelector(`.chat-item[data-chat-id="${chat.chat_id}"]`);
+                        if (chatItem) {
+                            const unreadCount = chatItem.querySelector('.unread-count');
+                            if (unreadCount) {
+                                unreadCount.textContent = chat.mensajes_no_leidos;
+                                if (chat.mensajes_no_leidos === 0) {
+                                    unreadCount.remove();
+                                }
+                            } else if (chat.mensajes_no_leidos > 0) {
+                                const newUnreadCount = document.createElement('span');
+                                newUnreadCount.className = 'unread-count';
+                                newUnreadCount.textContent = chat.mensajes_no_leidos;
+                                chatItem.appendChild(newUnreadCount);
+                            }
+                        }
+                    });
+                }
+            })
+            .catch(error => console.error('Error al actualizar mensajes no leídos:', error));
+    }
+
+
+        // Llamar a la función cada 1 segundos
+        setInterval(updateUnreadMessages, 1000);
 
         // Función para enviar el mensaje
         document.getElementById('send-button').addEventListener('click', function() {
@@ -114,13 +146,11 @@ $conn->close();
                 return;
             }
 
-            // Enviar el mensaje al servidor ajusta la URL 
             const chatId = prompt("Por favor, ingresa el ID del chat al que deseas enviar el mensaje:");
             if (!chatId) {
                 return;
             }
 
-            // Deshabilitar el botón mientras se envía
             this.disabled = true;
             this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
 
@@ -146,9 +176,26 @@ $conn->close();
                 alert('Hubo un problema al enviar el mensaje.');
             })
             .finally(() => {
-                // Rehabilitar el botón
                 this.disabled = false;
                 this.innerHTML = '<i class="fas fa-paper-plane"></i> Enviar';
+            });
+        });
+
+        // Marcar mensajes como leídos al abrir el chat
+        document.querySelectorAll('.chat-link').forEach(link => {
+            link.addEventListener('click', function() {
+                const chatId = this.href.split('chat_id=')[1];
+                fetch(`http://localhost/chat-web/api/mark_as_read.php?chat_id=${chatId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            const unreadCount = this.querySelector('.unread-count');
+                            if (unreadCount) {
+                                unreadCount.remove();
+                            }
+                        }
+                    })
+                    .catch(error => console.error('Error al marcar mensajes como leídos:', error));
             });
         });
     </script>
