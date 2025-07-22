@@ -123,7 +123,7 @@ function assignResponsable($conn) {
                         
                         switch($mensaje['remitente']) {
                             case 'cliente':
-                                $senderName = 'Cliente';
+                                $senderName = 'Tú';
                                 $messageClass = 'message-cliente';
                                 break;
                             case 'bot':
@@ -170,7 +170,7 @@ function assignResponsable($conn) {
                     // Determinar el nombre del remitente 
                     switch(mensaje.remitente) {
                         case 'cliente':
-                            senderName = 'Cliente';
+                            senderName = 'Tú';
                             messageClass = 'message-cliente';
                             break;
                         case 'bot':

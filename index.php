@@ -1,6 +1,12 @@
 <?php
 session_start(); // Iniciar la sesión
 
+// Registrar log de errores
+function logError($message) {
+    $logFile = 'logs/error_log.log'; // Ruta del archivo de log
+    $currentDate = date('Y-m-d H:i:s');
+}
+
 // Función para simular el envío de un mensaje a WhatsApp
 function sendWhatsApp($message) {
     $logFile = 'logs/whatsapp.log';
@@ -133,7 +139,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['whatsapp_message'])) 
                 alert('Hubo un problema al enviar el mensaje.');
             });
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const messageInput = document.getElementById('whatsapp-message');
+            if (messageInput) {
+                messageInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        sendWhatsAppMessage();
+                    }
+                });
+            }
+        });
     </script>
+
 
 </body>
 </html>

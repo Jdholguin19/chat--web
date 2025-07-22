@@ -1,5 +1,4 @@
-
-        * {
+* {
             box-sizing: border-box;
         }
 
@@ -118,22 +117,94 @@
             background-color: #fafafa;
         }
 
+        /* Estilos base para mensajes */
         .message {
             margin-bottom: 12px;
-            padding: 10px;
-            border-radius: 8px;
+            padding: 10px 12px;
+            border-radius: 18px;
             background-color: white;
-            border-left: 4px solid #28a745;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            max-width: 70%;
+            word-wrap: break-word;
+            position: relative;
         }
 
-        .message strong {
-            color: #28a745;
+        /* Mensajes del cliente (derecha) */
+        .message-cliente {
+            background-color: #5ba96d;
+            color: white;
+            margin-left: auto;
+            margin-right: 0;
+            border-bottom-right-radius: 5px;
         }
 
-        .message em {
+        .message-cliente strong {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 12px;
+        }
+
+        .message-cliente em {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 11px;
+        }
+
+        /* Mensajes del bot y responsable (izquierda) */
+        .message-bot,
+        .message-responsable,
+        .message-sistema {
+            background-color: #f1f3f4;
+            color: #333;
+            margin-left: 0;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+
+        .message-bot {
+            border-left: 3px solid #007bff;
+        }
+
+        .message-responsable {
+            border-left: 3px solid #28a745;
+        }
+
+        .message-sistema {
+            border-left: 3px solid #6c757d;
+        }
+
+        .message-bot strong {
+            color: #007bff;
+            font-size: 12px;
+        }
+
+        .message-responsable strong {
+            color: #56a468;
+            font-size: 12px;
+        }
+
+        .message-sistema strong {
             color: #6c757d;
             font-size: 12px;
+        }
+
+        .message-bot em,
+        .message-responsable em,
+        .message-sistema em {
+            color: #1283e5;
+            font-size: 11px;
+        }
+
+        /* Contenedor de mensaje para alineación */
+        .message-container {
+            display: flex;
+            margin-bottom: 12px;
+        }
+
+        .message-container.cliente {
+            justify-content: flex-end;
+        }
+
+        .message-container.otros {
+            justify-content: flex-start;
         }
 
         #message-input {
@@ -153,7 +224,7 @@
 
         #message:focus {
             outline: none;
-            border-color: #28a745;
+            border-color: #4c965e;
             box-shadow: 0 0 5px rgba(40, 167, 69, 0.3);
         }
 
@@ -228,6 +299,10 @@
                 height: 300px;
             }
 
+            .message {
+                max-width: 85%;
+            }
+
             #message-input {
                 flex-direction: column;
                 gap: 15px;
@@ -276,6 +351,10 @@
             #messages {
                 height: 250px;
                 padding: 10px;
+            }
+
+            .message {
+                max-width: 90%;
             }
         }
 
